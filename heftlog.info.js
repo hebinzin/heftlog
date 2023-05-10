@@ -9,7 +9,7 @@ require("Storage").write("heftlog.info",{
   "src":"heftlog.app.js",
   "icon":"heftlog.img",
   "version":"0.1",
-  "tags":"tool,health"
-  "files":"heftlog.info,heftlog.app.js"
+  "tags":"tool,health",
+  "files":"heftlog.info,heftlog.app.js",
   "data":"heftlog.json"
 });

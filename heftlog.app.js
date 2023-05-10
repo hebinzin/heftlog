@@ -7,16 +7,14 @@ function saveFile(object, key, value, file)
   S.writeJSON(file, object);
 }
 
-/*
- * VARIABLES:
- */
-
-// Load data from `heftlog.json` if it exists
+// Load data from json file if it exists
 let data = Object.assign({
   // Default values
   height:null,
   log:null
 }, S.readJSON('heftlog.json', true) || {});
+
+console.log(data);
 
 
 // Menu to allow the user to set his own height
