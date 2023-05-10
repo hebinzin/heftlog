@@ -1,0 +1,39 @@
+@startuml
+rectangle "//'Heft Log'//" {
+
+  'ATORES:
+  package Sistema
+  Usuário as User
+
+  'EVENTOS:
+  note "1º Acesso" as 1_acesso
+
+  'AÇÕES DO USUÁRIO:
+  User --> (Registrar peso)
+  User --> (Ver gráfico)
+  1_acesso <- User
+  (//Inserir altura//) ~ 1_acesso
+  User --> (//Atualizar altura//)
+
+  'AÇÔES DO SISTEMA:
+  (Armazenar\nregistros de peso) <-- Sistema
+  (//Armazenar altura//) <- Sistema
+
+  'INCLUSÔES:
+  (//Inserir altura//) <. (//Atualizar altura//)
+  (//Inserir altura//) ..> (//Armazenar altura//)
+  (Registrar peso) ..> (Armazenar\nregistros de peso)
+  (Armazenar data) <.. (Armazenar\nregistros de peso)
+
+  'EXTENSÔES:
+  (//Mostrar IMC//) <~ (Desenhar gráfico)
+
+  'DEPENDÊNCIAS:
+  (Desenhar gráfico) ==> (Armazenar\nregistros de peso)
+  (Desenhar gráfico) ==> (Armazenar data)
+  (Ver gráfico) ==> (Desenhar gráfico)
+  (//Calcular IMC//) ==> (//Armazenar altura//)
+  (//Calcular IMC//) ==> (Armazenar\nregistros de peso)
+  (//Mostrar IMC//) ==> (//Calcular IMC//)
+}
+@enduml
