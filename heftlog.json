@@ -1,17 +1,17 @@
 {
-  "height": 167,
+  "height": 165,
   "log": [
     {
       "date": 20230509,
-      "weight": 71.5
+      "heft": 71.0
     },
     {
       "date": 20230508,
-      "weight": 71.7
+      "heft": 72.0
     },
     {
       "date": 20230505,
-      "weight": 72.0
+      "heft": 72.5
     }
   ]
 }
