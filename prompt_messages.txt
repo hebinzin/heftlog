@@ -1,0 +1,2 @@
+    prompt = 'Overwrite\nweight record?';
+    prompt = 'File a new\nweight record?';
