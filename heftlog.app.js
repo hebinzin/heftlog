@@ -17,7 +17,6 @@ var HeightMenu = {
   max: 272, // Robert Wadlow
   step: 1,
   onchange: h => { 
-    //saveFile(Profile, 'height', h, FILE);
     Profile.height = h;
     S.writeJSON(FILE, Profile);
   }
@@ -39,13 +38,13 @@ var MainMenu = {
     step: 0.1,
     onchange: weight => { logWeight(weight, Profile, FILE); }
   },
-  'Load Graph' : () => { loadGraph(); },
+  'Load Graph' : () => { loadGraph(Profile.log); },
   'Show Log' : () => { showLog(Profile.log); },
   'Change height' : HeightMenu,
   'Exit': Bangle.showClock()
 };
 
-// Enter 'W'eight and current date in the 't'ally and save it to 'F'ile
+// Enter current date and 'W'eight in the 't'ally and save it to 'F'ile
 function logWeight(W, t, F){
   let d = Date().getDate(),
   m = Date().getMonth() + 1,
@@ -56,7 +55,8 @@ function logWeight(W, t, F){
   }
 
   let entry = {
-  	date : Number(y.toString() + _addzero_(m) + _addzero_(d)),
+    date : Number(y.toString() + _addzero_(m) + _addzero_(d)),
+    timestamp : Math.round(Date.now() / 1000),
   	heft : W
   };
 
@@ -77,31 +77,83 @@ function logWeight(W, t, F){
 }
 
 // TODO
-function loadGraph(){
-  Bangle.showClock();
+function loadGraph(L){
+  E.showMenu();
+
+  // Calculate 'x' coordinates (time) for each log entry:
+  // First we get the span between the log's last and first timestamp
+  let span = L[0].timestamp - L[L.length-1].timestamp;
+  // We'll use the same iteration to get the lowest and highest heft
+  let bottom = L[0].heft, top = bottom;
+
+  for (i = 0; i < L.length; i++){
+
+    // Each entry also gets its span calculated
+    // which is then divided by the total span.
+    // This gives us the coordinate as a percentage value
+    L[i].x = ((L[i].timestamp - L[L.length-1].timestamp) / span).toFixed(3);
+
+    // Check wether the current heft is the highest or lowest
+    if (L[i].heft > top){
+      top = L[i].heft;
+    } else if (L[i].heft < bottom){
+      bottom = L[i].heft;
+    }
+  }
+
+  // How much the user's weight has changed
+  let variance = top - bottom;
+
+  // Calculate the 'y' coordinates (weight) for each log entry:
+  for (j = 0; j < L.length; j++){
+    L[j].y = (1 -((L[j].heft - bottom) / variance)).toFixed(3);
+  }
+  
+  console.log(L);
+
+  const R = Bangle.appRect;
+  for (k = L.length - 2; k >= 0; k--){
+    g.drawLine(
+      L[k+1].x * R.w,
+      L[k+1].y * R.h + 24,
+      L[k].x * R.w,
+      L[k].y * R.h + 24
+    );
+  }
+
+  setWatch(() => {
+    if (Bangle.isLocked() == false){
+      g.clear();
+      E.showMenu(MainMenu);
+    }
+  }, BTN1);
 }
 
-// TODO
+// Presents the user with a scrollable heft log
 function showLog(L){
-
+  E.showMenu();
   function _formatDt_(dt){
     dt = dt.toString();
     return dt.slice(2,4) + "-" + dt.slice(4,6) + "-" + dt.slice(6,8);
   }
 
   let s = {
-    h: 22,
+    h: 30,
     c: L.length,
     draw: (i, r) => {
       g.clearRect(r.x,r.y,r.x+r.w-1,r.y+r.h-1);
-      g.setFont('4x6', 3);
+      g.setFont('12x20');
+      let spacer;
+      if (L[i].heft > 99.9) spacer = '     ';
+      else spacer = '      ';
       g.drawString(
-        _formatDt_(L[i].date) + '  ' + L[i].heft
-        , r.x
-        , r.y+6
+        _formatDt_(L[i].date) + spacer + L[i].heft,
+        r.x+10,
+        r.y+10
       );
     },
-    back: () => { E.showScroller(); E.showMenu(MainMenu); }
+    back: () => { E.showScroller(); E.showMenu(MainMenu); },
+    select : i => { return;}
   };
   E.showScroller(s);
 }
