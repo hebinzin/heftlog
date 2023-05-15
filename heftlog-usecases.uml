@@ -1,0 +1,43 @@
+'This file codifies a use case diagram for Heft Log
+'It can be visualized at https://plantuml.com/plantuml/
+
+@startuml
+
+rectangle "//'Heft Log'//" {
+
+  'AGENTS:
+  package System
+  User as User
+
+  'EVENTS:
+  note "1st Access" as 1st_access
+
+  'USER ACTIONS:
+  User --> (Log weight)
+  User --> (View chart)
+  1st_access <- User
+  (//Insert height//) ~ 1st_access
+  User --> (//Update height//)
+
+  'SYSTEM ACTIONS:
+  (Store weight\nrecords) <-- System
+  (//Store height//) <- System
+
+  'INCLUDED ACTIONS:
+  (//Insert height//) <. (//Update height//)
+  (//Insert height//) ..> (//Store height//)
+  (Log weight) ..> (Store weight\nrecords)
+  (Store date) <.. (Store weight\nrecords)
+
+  'DEPENDANT ACTIONS:
+  (Draw line\nchart) ==> (Store weight\nrecords)
+  (Draw line\nchart) ==> (Store date)
+  (View chart) ==> (Draw line\nchart)
+  (//Calculate BMI//) ==> (//Store height//)
+  (//Calculate BMI//) ==> (Store weight\nrecords)
+  (//Show BMI//) ==> (//Calculate BMI//)
+
+  'EXTENDED ACTIONS:
+  (//Show BMI//) <~ (Draw line\nchart)
+}
+@enduml
