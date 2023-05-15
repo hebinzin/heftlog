@@ -16,7 +16,7 @@ var HeightMenu = {
   min: 55, // Chandra Bahadur Dangi
   max: 272, // Robert Wadlow
   step: 1,
-  onchange: h => { 
+  onchange: h => {
     Profile.height = h;
     S.writeJSON(FILE, Profile);
   }
@@ -38,8 +38,8 @@ var MainMenu = {
     step: 0.1,
     onchange: weight => { logWeight(weight, Profile, FILE); }
   },
-  'Load Graph' : () => { loadGraph(Profile.log); },
   'Show Log' : () => { showLog(Profile.log); },
+  'Load Graph' : () => { loadGraph(Profile.log, Profile.height); },
   'Change height' : HeightMenu,
   'Exit': Bangle.showClock()
 };
@@ -76,22 +76,42 @@ function logWeight(W, t, F){
   return true;
 }
 
-// TODO
-function loadGraph(L){
+function formatDt(dt, separator){
+  dt = dt.toString();
+  return dt.slice(2,4) + separator + dt.slice(4,6) + separator + dt.slice(6,8);
+}
+
+// Takes the heft log and show it as a scrollable list
+function showLog(L){
   E.showMenu();
 
-  // Calculate 'x' coordinates (time) for each log entry:
-  // First we get the span between the log's last and first timestamp
-  let span = L[0].timestamp - L[L.length-1].timestamp;
-  // We'll use the same iteration to get the lowest and highest heft
+  let list = {
+    h: 30,
+    c: L.length,
+    draw: (i, r) => { // 'i'ndex and 'r'ectangular list item area
+      g.clearRect(r.x,r.y,r.x+r.w-1,r.y+r.h-1).setFont('12x20')
+       .setFontAlign(-1).drawString(formatDt(L[i].date, '-'), r.x+6, r.y+10)
+       .setFontAlign(1).drawString(L[i].heft.toFixed(1), r.w-6, r.y+10);
+    },
+    back: () => { E.showScroller().showMenu(MainMenu); },
+    select : i => { return;}
+  };
+  E.showScroller(list);
+}
+
+function loadGraph(L, height){
+  E.showMenu();
+
+  // The app usage timespan (interval from first to last timestamp)
+  let span = L[0].ts - L[L.length-1].ts;
+  // To store the topmost and b
   let bottom = L[0].heft, top = bottom;
 
   for (i = 0; i < L.length; i++){
-
     // Each entry also gets its span calculated
     // which is then divided by the total span.
     // This gives us the coordinate as a percentage value
-    L[i].x = ((L[i].timestamp - L[L.length-1].timestamp) / span).toFixed(3);
+    L[i].x = ((L[i].ts - L[L.length-1].ts) / span).toFixed(3);
 
     // Check wether the current heft is the highest or lowest
     if (L[i].heft > top){
@@ -101,61 +121,58 @@ function loadGraph(L){
     }
   }
 
-  // How much the user's weight has changed
-  let variance = top - bottom;
+  // We'll use the same iteration to get the lowest and highest heft
+  let variance = top - bottom; // How much the user's weight changed
 
   // Calculate the 'y' coordinates (weight) for each log entry:
   for (j = 0; j < L.length; j++){
     L[j].y = (1 -((L[j].heft - bottom) / variance)).toFixed(3);
   }
-  
-  console.log(L);
 
-  const R = Bangle.appRect;
+  const R = Bangle.appRect; // Screen portion available to the app
+  const graphHeight = R.h * 0.75; // ¼ height is reserved for the gap
+  const gap = (R.h - graphHeight) / 2; // The gap for displaying info
+  const offset = g.getHeight() - R.h; // The space used by the widgets
+
   for (k = L.length - 2; k >= 0; k--){
+
+    let imc = L[k].heft / Math.pow(height / 100, 2);
+    if (imc > 30 || imc < 17) g.setColor(1, 0, 0);
+    else if (imc > 25 || imc < 18.5) g.setColor(1, 1, 0);
+    else if (imc > 21 && imc < 23) g.setColor(0, 1, 0);
+    else g.setColor(1, 1, 1);
+
     g.drawLine(
       L[k+1].x * R.w,
-      L[k+1].y * R.h + 24,
+      L[k+1].y * graphHeight + offset + gap,
       L[k].x * R.w,
-      L[k].y * R.h + 24
+      L[k].y * graphHeight + offset + gap
     );
+    g.drawCircle(L[k].x * R.w, L[k].y * graphHeight + offset + gap, 1);
+    g.reset();
   }
 
-  setWatch(() => {
-    if (Bangle.isLocked() == false){
-      g.clear();
-      E.showMenu(MainMenu);
-    }
-  }, BTN1);
-}
+  g // Writes top and bottom weight and last and first entry date:
+   .setFont('4x6', 2).setFontAlign(0, 0)
+   .drawString(top, R.w / 2, gap / 2 + offset)
+   .drawString(bottom, R.w / 2, R.h - (gap / 2) + offset)
+   .setFont('6x8').setFontAlign(0, 0, 90)
+   .drawString(formatDt(L[0].date, '/'), 4, R.h / 2  + offset)
+   .drawString(formatDt(L[L.length-1].date, '/'), R.w - 4, R.h / 2 + offset);
 
-// Presents the user with a scrollable heft log
-function showLog(L){
-  E.showMenu();
-  function _formatDt_(dt){
-    dt = dt.toString();
-    return dt.slice(2,4) + "-" + dt.slice(4,6) + "-" + dt.slice(6,8);
-  }
-
-  let s = {
-    h: 30,
-    c: L.length,
-    draw: (i, r) => {
-      g.clearRect(r.x,r.y,r.x+r.w-1,r.y+r.h-1);
-      g.setFont('12x20');
-      let spacer;
-      if (L[i].heft > 99.9) spacer = '     ';
-      else spacer = '      ';
-      g.drawString(
-        _formatDt_(L[i].date) + spacer + L[i].heft,
-        r.x+10,
-        r.y+10
-      );
+  setWatch(
+    () => { 
+      if (Bangle.isLocked() == false){
+        g.clear();
+        E.showMenu(MainMenu);
+      }
     },
-    back: () => { E.showScroller(); E.showMenu(MainMenu); },
-    select : i => { return;}
-  };
-  E.showScroller(s);
+    BTN1,
+    {
+      repeat: false,
+      edge: 'falling'
+    }
+  );
 }
 
 ///////////////////////////// CODE START //////////////////////////////
