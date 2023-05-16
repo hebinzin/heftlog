@@ -14,7 +14,7 @@ At the repository's root, there's also other relevant items:
 - `screenshots/`, a directory with some screenshots of the app.
 - `weight-scale.png`, the app icon in full sized png (as created by [Flat-icons-com]), which can be converted (check the [Espruino Image Converter]) and uploaded to the device.
 
-![Heft Log icon](weight-scale.png)
+<img src="weight-scale.png" width="48" />
 
 
 ## Usage
@@ -32,11 +32,11 @@ At the repository's root, there's also other relevant items:
 
 ## Screenshots
 
-![1st launch screen](screnshots/0.png)
-![Insert height screen](screnshots/1.png)
-![Main menu](screnshots/2.png)
-![Main menu (cont.)](screnshots/3.png)
-![Weight screen](screnshots/4.png)
+![1st launch screen](screenshots/0.png)
+![Insert height screen](screenshots/1.png)
+![Main menu](screenshots/2.png)
+![Main menu (cont.)](screenshots/3.png)
+![Weight screen](screenshots/4.png)
 ![Scrollable log](screenshots/5.png)
 ![Weight line chart](screenshots/6.png)
 

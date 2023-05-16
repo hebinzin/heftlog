@@ -167,8 +167,8 @@ function loadGraph(L, height){
    .drawString(top, R.w / 2, gap / 2 + offset)
    .drawString(bottom, R.w / 2, R.h - (gap / 2) + offset)
    .setFont('6x8').setFontAlign(0, 0, 90)
-   .drawString(formatDt(L[0].date, '/'), 4, R.h / 2  + offset)
-   .drawString(formatDt(L[L.length-1].date, '/'), R.w - 4, R.h / 2 + offset);
+   .drawString(formatDt(L[L.length-1].date, '/'), 4, R.h / 2  + offset)
+   .drawString(formatDt(L[0].date, '/'), R.w - 4, R.h / 2 + offset);
 
   // Enables returning with the back widget or button press
   Bangle.setUI({
