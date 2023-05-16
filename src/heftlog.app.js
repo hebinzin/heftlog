@@ -74,7 +74,7 @@ function logWeight(W, profile){
   }
 
   //TODO: Prompt the user to confirm in case of overwritting
-  S.writeJSON(FILE, t);
+  S.writeJSON(FILE, profile);
   return true;
 }
 
@@ -105,9 +105,16 @@ function showLog(L){
 function loadGraph(L, height){
   E.showMenu();
 
+  // Warns the user in case of insufficient data
+  if (L.length < 3){
+    E.showAlert('Insufficient data for Graph')
+     .then(() => start() );
+    return;
+  }
+
   // Calculate the interval between the first and the last entry
   let span = L[0].ts - L[L.length-1].ts;
-  
+
   // Placeholders for the minimum and maximum weight values
   let bottom = L[0].heft, top = bottom;
 
